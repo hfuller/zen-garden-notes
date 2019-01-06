@@ -2,13 +2,15 @@
 
 (This assumes everything is Debian 9.)
 
-1. Run ```sudo virsh dumpxml name-of-vm``` and collect the following data about the VM:
+1. Ensure that grub-pc is installed in the VM.
+2. Ensure that /etc/default/grub does not contain "console=ttyS0". It seems to be OK if there is no console directive at all, but to be safe, it might be good to set ```GRUB_CMDLINE_LINUX="console=hvc0"``` and run ```update-grub```.
+3. Run ```sudo virsh dumpxml name-of-vm``` and collect the following data about the VM:
    * name
    * currentMemory
    * vcpu
    * disk type
    * interface
-2. Make a new file, ```/etc/xen/name-of-vm.cfg```, using this template.
+4. Make a new file, ```/etc/xen/name-of-vm.cfg```, using this template.
 ```
 name        = 'name-of-vm'
 
@@ -22,10 +24,11 @@ vif         = [ 'mac=52:54:00:cf:ae:4b, bridge=vmbr0' ]
 on_crash    = 'restart'
 bootloader = '/usr/lib/xen-4.8/bin/pygrub'
 ```
-3. Ensure the following tweaks have been made to the template:
+5. Ensure the following tweaks have been made to the template:
    * name is accurate
    * memory has been set to currentMemory / 1024 (since libvirt stores this in KiB by default)
    * vcpu count has been set correctly
    * disk type is correct, and the path to the file or device is correct
    * interface type is correct, and the bridge name or other interface parameter(s) is correct
-4. Uh... I guess that's it?
+6. Start the VM.
+7. Add a link to ```/etc/xen/auto``` if appropriate.
